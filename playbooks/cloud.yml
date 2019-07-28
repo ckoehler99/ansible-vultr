@@ -1,0 +1,39 @@
+- hosts: jumphost
+  gather_facts: no
+  tasks:
+
+  - name: Create a firewall group
+    local_action:
+      module: vr_firewall_group
+      name: jumphost
+    run_once: yes
+
+  - name: open SSH port for all ipv4 and ipv6
+    local_action:
+      module: vr_firewall_rule
+      group: jumphost
+      protocol: tcp
+      port: 22
+      ip_version: "{{ item }}"
+    with_items: [ v4, v6 ]
+
+  - name: allow ping
+    local_action:
+      module: vr_firewall_rule
+      group: jumphost
+      protocol: icmp
+
+  - name: ensure an SSH key is present
+    local_action:
+      module: vr_ssh_key
+      name: ck ssh key
+      ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+  - name: Ensure a cloud server exists
+    local_action:
+      module: vr_server
+      name: "{{ inventory_hostname_short }}"
+      os: "CentOS 7 x64"
+      plan: "1024 MB RAM,25 GB SSD,1.00 TB BW"
+      region: Frankfurt
+

@@ -1,0 +1,7 @@
+all:
+  hosts:
+    jumphost.vultr.ck99.io
+  children:
+    jumphost:
+      hosts:
+        jumphost.vultr.ck99.io
